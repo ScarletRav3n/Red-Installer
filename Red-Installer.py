@@ -1,12 +1,8 @@
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PyQt5.QtGui import QFont, QColor, QImage, QPalette, QBrush, QPixmap
 from PyQt5.QtCore import Qt, QProcess, QThread
-from PyQt5.QtWidgets import (QWidget, QPushButton, QMessageBox, QLineEdit,
-                             QMainWindow, QFileDialog, QLabel, QApplication)
-import threading
+from PyQt5.QtWidgets import (QWidget, QPushButton, QMessageBox, QHBoxLayout, QGridLayout,
+                             QGraphicsDropShadowEffect, QFileDialog, QLabel, QApplication)
 import urllib.request
-import tarfile
-import time
 import sys
 import os
 
@@ -15,9 +11,8 @@ class MainWindow(QWidget):
     def __init__(self):
         super(MainWindow, self).__init__()
 
-        self.large_font = QtGui.QFont("Arial", 16)
-        self.reg_font = QtGui.QFont("Arial", 10)
-        self.small_font = QtGui.QFont("Arial", 8)
+        self.large_font = QFont("Arial", 16)
+        self.reg_font = QFont("Arial", 10)
 
         self.init_ui()
 
@@ -26,9 +21,9 @@ class MainWindow(QWidget):
                "font-weight: bold")
 
         # vbox
-        hbox = QtWidgets.QHBoxLayout()
-        bbox = QtWidgets.QHBoxLayout()
-        self.rbox = QtWidgets.QGridLayout()
+        hbox = QHBoxLayout()
+        bbox = QHBoxLayout()
+        self.rbox = QGridLayout()
 
         hbox.setContentsMargins(0, 0, 0, 0)
         bbox.setContentsMargins(0, 5, 5, 0)
@@ -41,9 +36,9 @@ class MainWindow(QWidget):
         self.l1 = QLabel(self)
         self.l1.setFont(self.large_font)
         self.l1.setStyleSheet(css)
-        shadow = QtWidgets.QGraphicsDropShadowEffect()
+        shadow = QGraphicsDropShadowEffect()
         shadow.setBlurRadius(5)
-        shadow.setColor(QtGui.QColor("#5e5e5e"))
+        shadow.setColor(QColor("#5e5e5e"))
         shadow.setOffset(2, 2)
         self.l1.setGraphicsEffect(shadow)
         hbox.addWidget(self.l1, 0, Qt.AlignCenter)
@@ -87,10 +82,10 @@ class MainWindow(QWidget):
         self.setLayout(self.rbox)
 
         # bg
-        bgimg = QtGui.QImage()
+        bgimg = QImage()
         bgimg.loadFromData(urllib.request.urlopen('http://i.imgur.com/VW9eF72.jpg').read())
-        bg = QtGui.QPalette()
-        bg.setBrush(QtGui.QPalette.Background, QtGui.QBrush(QtGui.QPixmap(bgimg)))
+        bg = QPalette()
+        bg.setBrush(QPalette.Background, QBrush(QPixmap(bgimg)))
 
         # window
         self.setFixedSize(400, 150)
@@ -147,10 +142,8 @@ class MainWindow(QWidget):
 
         self.process.start('git clone -b develop --single-branch '
                            'https://github.com/Twentysix26/Red-DiscordBot.git ' + fdir)
-        print('git clone -b develop --single-branch '
-              'https://github.com/Twentysix26/Red-DiscordBot.git ' + fdir)
         self.process.waitForFinished(-1)
-        print('daneun?')
+        self.l1.setText("DONE INSTALLING RED")
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -171,19 +164,19 @@ class Download(QThread):
         self.wait()
 
     def run(self):
-        print('yes?')
         if sys.platform == 'win32':
             if not os.path.exists("pkg"):
                 os.makedirs("pkg")
 
             if not os.path.exists("pkg\python-3.6.1rc1.exe"):
-                urllib.request.urlretrieve('https://www.python.org/ftp/python/3.6.1/python-3.6.1rc1-webinstall.exe',
-                                           'pkg\python-3.6.1rc1.exe')
+                urllib.request.urlretrieve(
+                    'https://www.python.org/ftp/python/3.6.1/python-3.6.1rc1-amd64-webinstall.exe',
+                    'pkg\python-3.6.1rc1.exe')
 
             if not os.path.exists("pkg\Git-2.12.0-64-bit.exe"):
-                urllib.request.urlretrieve('https://github.com/git-for-windows/git/releases/download/'
-                                           'v2.12.0.windows.1/Git-2.12.0-64-bit.exe', 'pkg\Git-2.12.0-64-bit.exe')
-        print('done')
+                urllib.request.urlretrieve(
+                    'https://github.com/git-for-windows/git/releases/download/v2.12.0.windows.1/Git-2.12.0-64-bit.exe',
+                    'pkg\Git-2.12.0-64-bit.exe')
         self.quit()
 
 
@@ -196,9 +189,9 @@ class Exe(QThread):
 
     def run(self):
         self.process = QProcess()
-        if sys.executable is None:
-            self.process.start('pkg\python-3.6.1rc1.exe PrependPath=1 Include_test=0')
-            self.process.waitForFinished(-1)
+
+        self.process.start('pkg\python-3.6.1rc1.exe PrependPath=1 Include_test=0 SimpleInstall=1 Include_pip=1')
+        self.process.waitForFinished(-1)
 
         self.process.start('pkg\Git-2.12.0-64-bit.exe /SILENT')
         self.process.waitForFinished(-1)
